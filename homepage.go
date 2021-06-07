@@ -23,14 +23,17 @@ func main() {
 	}
 }
 
-func htmlWrapper(handler http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+func htmlWrapper(hf http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "<html>")
 		fmt.Fprintln(w, "<head>")
 		fmt.Fprintln(w, "<meta charset=\"UTF-8\" />")
 		fmt.Fprintln(w, "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />")
 		fmt.Fprintln(w, `<style>
+			@import url("/fonts/fonts.css");
 			body {
+				font-family: InterDisplay, sans-serif;
+				font-weight: 400;
 				max-width: 960px;
 				padding: 25px;
 				margin: 0 auto;
@@ -41,20 +44,20 @@ func htmlWrapper(handler http.Handler) http.Handler {
 		fmt.Fprintln(w, "<body>")
 		fmt.Fprintln(w, "<hr />")
 		start := time.Now()
-		handler.ServeHTTP(w, r)
+		hf(w, r)
 		fmt.Fprintln(w, "<hr />")
-		fmt.Fprintf(w, "<p style=\"text-align: center;\">Made with love, and Go. This website is <a href=\"https://github.com/morgangallant/homepage\">open source</a>. Rendered page in %d ms.</p>\n", time.Since(start).Milliseconds())
+		fmt.Fprintf(w, "<p style=\"text-align: center;\">Made with love, and <a href=\"https://golang.org\">Go</a>. This website is <a href=\"https://github.com/morgangallant/homepage\">open source</a>. Rendered page in %d ms.</p>\n", time.Since(start).Milliseconds())
 		fmt.Fprintln(w, "</body>")
 		fmt.Fprintln(w, "</html>")
-	})
+	}
 }
 
-//go:embed blog
+//go:embed static
 var embedded embed.FS
 
 func run() error {
 	// md := goldmark.New()
-	bdir, err := fs.Sub(embedded, "blog")
+	bdir, err := fs.Sub(embedded, "static/blog")
 	if err != nil {
 		return err
 	}
@@ -63,10 +66,15 @@ func run() error {
 		return err
 	}
 	mux := http.NewServeMux()
-	mux.HandleFunc("/blog/", bh)
+	mux.HandleFunc("/blog/", htmlWrapper(bh))
+	fdir, err := fs.Sub(embedded, "static/fonts")
+	if err != nil {
+		return err
+	}
+	mux.Handle("/fonts/", http.StripPrefix("/fonts/", http.FileServer(http.FS(fdir))))
 	server := &http.Server{
 		Addr:         ":8888",
-		Handler:      htmlWrapper(mux),
+		Handler:      mux,
 		ReadTimeout:  time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
@@ -154,10 +162,6 @@ func blogHandler(bfs fs.FS) (http.HandlerFunc, error) {
 			fmt.Fprintf(w, "Invalid slug %s.", slug)
 			return
 		}
-		if _, err := p.content.WriteTo(w); err != nil {
-			log.Printf("failed to write content: %v", err)
-			http.Error(w, "failed to write content", http.StatusInternalServerError)
-			return
-		}
+		p.content.WriteTo(w)
 	}, nil
 }

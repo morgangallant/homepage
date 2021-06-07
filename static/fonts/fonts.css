@@ -1,0 +1,7 @@
+/* Inter Display CSS */
+
+@font-face {
+  font-family: 'InterDisplay';
+  font-style: normal;
+  src: url("/fonts/InterDisplay-Regular.otf") format("opentype");
+}
