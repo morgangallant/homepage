@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta property="og:site_name" content="Morgan Gallant" />
+    <meta property="og:title" content="Morgan Gallant" />
+    <meta property="og:type" content="website" />
+    <meta property="og:description" content="Founder, programmer, optimist." />
+    <meta property="og:image" content="/images/profile.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="249" />
+    <meta property="og:image:height" content="249" />
+    <meta property="og:url" content="https://morgangallant.com" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@morgallant" />
+    <meta name="twitter:title" content="Morgan Gallant" />
+    <meta name="twitter:description" content="Founder, programmer, optimist." />
+    <meta
+      name="twitter:image:src"
+      content="https://morgangallant.com/images/profile.jpg"
+    />
+    <meta name="description" content="Founder, programmer, optimist." />
+    <title>Morgan Gallant | The Future of Computer Networks</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <!-- Fathom - beautiful, simple website analytics -->
+    <script
+      src="https://cdn.usefathom.com/script.js"
+      data-site="LTHHIUKB"
+      defer
+    ></script>
+    <!-- / Fathom -->
+  </head>
+  <body>
+    <div class="blog">
+      <a href="/blog/">&larr; Blog</a>
+      <p><strong>The Future of Computer Networks</strong></p>
+      <p>Posted: June 7th, 2020</p>
+      <p>
+        There is no doubt that computer networks, the internet (heard of it?),
+        has changed the way that we live our lives. It started out very simply
+        as a military experiment, which quickly began to see use within
+        communities of researchers at different universities. As the internet
+        grew, more and more people had access to this massively expanding
+        repository of the world’s information. It's obvious that the initial
+        plan for the internet wasn't to support this many connected machines
+        (don't get me started on IPv4...), nevertheless, the internet itself is
+        generally considered a good thing.
+      </p>
+      <p>
+        The problem with the seemingly never-ending expansion of the internet is
+        somewhat paradoxical: a goal of the internet is to house the worlds
+        information, yet a lot of that information shouldn't be on the internet.
+        Consider a typical software company, they have a database server along
+        with a few application servers which serve requests for their customers.
+        Application servers and database servers are networked together, each of
+        which are (typically) assigned a public IPv4/IPv6 address and put behind
+        a firewall to prevent unauthorized connections. Have you figured out the
+        issue yet? We put machines (possibly containing extremely sensitive
+        data) on the public network, then try and patch up the holes with
+        virtual duct tape. Then for some reason, we're surprised when
+        vulnerabilities are found leading to the personal information of 147.9
+        million people being exposed (cough Equifax cough).
+      </p>
+      <p>
+        The solution to this problem is simple: some (if not most) machines
+        shouldn't be accessible via the public internet. This really isn't a
+        breakthrough as cloud computing providers have been pushing for this for
+        a while now with VPC systems, and VPN technologies. The concept is
+        relatively simple - small, self-contained networks which require
+        authentication to join, meaning once you're inside, communications and
+        data are private by default. In essence, what I'm trying to get at is
+        this idea of a personal (or corporate) internet. Inside this personal
+        internet, you're the boss, and you can control who joins this network,
+        and who can talk to who within it.
+      </p>
+      <p>
+        At that, we reach the point of this (rant). Enter
+        <a href="https://tailscale.com/">Tailscale</a> - a startup I'm rather
+        fond of, and who I have been a power user of for a while now. Tailscale
+        lets you easily make your own personal internet, for free in most cases.
+        It's a weird paradigm shift, since inside this internet, you must
+        actively work to make your applications insecure rather than the other
+        way around. All traffic is encrypted and uses P2P as much as possible
+        (DERP servers are used when P2P connections aren't possible -
+        essentially an encrypted packet relay, nothing special). For a fun
+        anecdote that isn't condoned by my employer, I setup my work machine at
+        the office to my personal Tailscale network, and was able to tunnel
+        directly into the machine from my house, without being connected to any
+        of the corporate VPN nodes (presumably through many firewalls / NATs).
+        Pro tip - using a P2P connection for RDP sessions is much preferred over
+        a VPN-proxy onto the corporate network, just don't tell IT.
+      </p>
+      <p>
+        On the topic of my employer (who makes some epyc gear), it's worth
+        mentioning that adopting Tailscale would be a great move for the
+        company. Right now, we have 17 VPN servers worldwide which allow us to
+        connect to the corporate network. If we're not in the office, any
+        connection we make to another server inside this network has to be
+        through one of these VPN servers, which certainly introduces some
+        difficulty given that most of our 11,400 employees are working at home
+        due to COVID-19. Obviously, productivity is impacted by the load on
+        these servers, which leads to RDP sessions being quite sluggish when
+        connecting to our work machines. A Tailscale network would alleviate
+        most (or all) of our networking problems, since any employee given
+        access to the network would be able to make a direct P2P connection (for
+        the most part) to any other machines on the network, if allowed to do so
+        by the company set access policies. In addition to this, the company
+        would also have full observability into the access logs of different
+        machines, which could help protect sensitive information on the network.
+        You could also say that it would be worth ryzen to the occasion (I'm
+        sorry for that one).
+      </p>
+      <p>
+        Before I started at my current employer, I did two internships at a
+        YC-backed home security company, which primarily made smart home
+        cameras, video doorbells, etc. In this role, I primarily focused on live
+        video streaming (bidirectional streaming between home IOT device and
+        users smartphone), and let me tell you this: with a few new features
+        (notably the ability to pre-authorize clients to connect to a network),
+        Tailscale would've been a game changer. Latency was important (ex. it's
+        important that users are able to have real-time conversations with
+        people who have rung their doorbell), and the ability to easily make
+        secure P2P connections between our servers and our cameras would've made
+        my job 100x easier. Forget any NAT traversal systems, hole punching, or
+        any other dirty networking tactic, it would all have gone away with
+        Tailscale.
+      </p>
+      <p>
+        So yeah, with my experience at both an IOT startup and a major
+        corporation with severe networking issues, I think I'm uniquely
+        qualified to rant about how great Tailscale is. It's a surprisingly
+        simple idea, let people create mini sub-internets that they control, and
+        Tailscale has done an amazing job making this a reality. I couldn't
+        imagine not using Tailscale for my daily work, whether it is SSHing into
+        my home servers from anywhere or exploiting the fact that I own the
+        network to do cool distributed systems work.
+      </p>
+      <p>
+        If you want to get started with automatic peer discovery with Tailscale,
+        I've
+        <a href="https://github.com/morgangallant/ipn"
+          >open sourced a little bit of code</a
+        >
+        to help out with this! You're welcome.
+      </p>
+    </div>
+  </body>
+</html>
