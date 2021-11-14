@@ -9,6 +9,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -72,7 +73,7 @@ func getDB() *gorm.DB {
 		if err != nil {
 			panic(err)
 		}
-		if err := db.AutoMigrate(&LogEntry{}).Error; err != nil {
+		if err := db.AutoMigrate(&LogEntry{}); err != nil {
 			panic(err)
 		}
 	}
@@ -82,13 +83,27 @@ func getDB() *gorm.DB {
 //go:embed site
 var efs embed.FS
 
+type htmlStripper struct {
+	inner http.FileSystem
+}
+
+func (fs *htmlStripper) Open(name string) (http.File, error) {
+	if !strings.HasSuffix(name, ".html") {
+		f, err := fs.inner.Open(name + ".html")
+		if err == nil {
+			return f, nil
+		}
+	}
+	return fs.inner.Open(name)
+}
+
 func run() error {
 	mux := http.NewServeMux()
 	sub, err := fs.Sub(efs, "site")
 	if err != nil {
 		return err
 	}
-	mux.Handle("/", http.FileServer(http.FS(sub)))
+	mux.Handle("/", http.FileServer(&htmlStripper{inner: http.FS(sub)}))
 	mux.HandleFunc("/api/logs", logsHandler())
 	mux.HandleFunc("/_wh/postmark", postmarkHandler())
 	return (&http.Server{

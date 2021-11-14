@@ -47,7 +47,7 @@
         const load = async () => {
             const logs = await fetch("/api/logs");
             const contents = await logs.json();
-            const html = contents.map(({ ts, contents }) => {
+            const html = contents.logs.map(({ ts, contents }) => {
                 return `<div class="log">
                     <p><strong>${ts}</strong></p>
                     <p>${contents}</p>
