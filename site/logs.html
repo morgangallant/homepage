@@ -31,18 +31,31 @@
       defer
     ></script>
     <!-- / Fathom -->
+    <style>
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+        }
+    </style>
   </head>
   <body>
-    <div class="middle">
-      <p><strong>Morgan Gallant</strong></p>
-      <p>
-        Founder, programmer, optimist. Currently working on
-        <a href="https://operand.ai">Operand</a>. I
-        <a href="https://twitter.com/morgallant">tweet</a> too much. Here's my
-        <a href="mailto:morgan@morgangallant.com">email</a>. I write <a href="/logs">logs</a> everyday, and I write longer-form
-        essays on my <a href="/blog/">blog</a> sometimes. As you can tell, I'm terrible at
-        frontends. Hope you have a good day! ❤️
-      </p>
+    <div class="container" id="root">
+        <p>Loading...</p>
     </div>
+    <script>
+        const rootContainer = document.getElementById('root');
+        const load = async () => {
+            const logs = await fetch("/api/logs");
+            const contents = await logs.json();
+            const html = contents.map(({ ts, contents }) => {
+                return `<div class="log">
+                    <p><strong>${ts}</strong></p>
+                    <p>${contents}</p>
+                </div>`;
+            }).join("");
+            rootContainer.innerHTML = html;
+        };
+        load();
+    </script>
   </body>
 </html>

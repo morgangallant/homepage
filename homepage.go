@@ -2,8 +2,8 @@ package main
 
 import (
 	"embed"
+	"encoding/json"
 	"fmt"
-	"io"
 	"io/fs"
 	"log"
 	"math/rand"
@@ -12,6 +12,9 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 func init() {
@@ -52,6 +55,30 @@ func getConfig() *config {
 	return cfg
 }
 
+type LogEntry struct {
+	ID        uint64 `gorm:"primaryKey"`
+	CreatedAt time.Time
+	Contents  string
+}
+
+var db *gorm.DB
+
+func getDB() *gorm.DB {
+	if db == nil {
+		var err error
+		db, err = gorm.Open(postgres.Open(getConfig().databaseUrl), &gorm.Config{
+			Logger: logger.Default.LogMode(logger.Silent),
+		})
+		if err != nil {
+			panic(err)
+		}
+		if err := db.AutoMigrate(&LogEntry{}).Error; err != nil {
+			panic(err)
+		}
+	}
+	return db
+}
+
 //go:embed site
 var efs embed.FS
 
@@ -62,6 +89,7 @@ func run() error {
 		return err
 	}
 	mux.Handle("/", http.FileServer(http.FS(sub)))
+	mux.HandleFunc("/api/logs", logsHandler())
 	mux.HandleFunc("/_wh/postmark", postmarkHandler())
 	return (&http.Server{
 		Addr:         fmt.Sprintf("0.0.0.0:%s", getConfig().port),
@@ -71,18 +99,58 @@ func run() error {
 	}).ListenAndServe()
 }
 
+func logsHandler() http.HandlerFunc {
+	type logEntry struct {
+		Timestamp time.Time `json:"ts"`
+		Contents  string    `json:"contents"`
+	}
+	type response struct {
+		Logs []logEntry `json:"logs"`
+	}
+	return func(w http.ResponseWriter, r *http.Request) {
+		var logs []LogEntry
+		if err := getDB().WithContext(r.Context()).Order("created_at desc").Find(&logs).Error; err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		var resp response
+		for _, l := range logs {
+			resp.Logs = append(resp.Logs, logEntry{
+				Timestamp: l.CreatedAt,
+				Contents:  l.Contents,
+			})
+		}
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+}
+
 func postmarkHandler() http.HandlerFunc {
+	type request struct {
+		From     string `json:"From"`
+		TextBody string `json:"TextBody"`
+	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		if key := r.URL.Query().Get("key"); key != getConfig().whkey {
 			http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
 			return
 		}
-		body, err := io.ReadAll(r.Body)
-		if err != nil {
+		var req request
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		} else if !(req.From == "morgan@morgangallant.com" || req.From == "morgan@operand.ai") {
+			http.Error(w, "invalid sender", http.StatusBadRequest)
+			return
+		}
+		if err := getDB().WithContext(r.Context()).Create(&LogEntry{
+			Contents: req.TextBody,
+		}).Error; err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		fmt.Printf("got body from postmark: %s\n", string(body))
 	}
 }
 
