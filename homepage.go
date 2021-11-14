@@ -122,6 +122,7 @@ func logsHandler() http.HandlerFunc {
 	type response struct {
 		Logs []logEntry `json:"logs"`
 	}
+	loc, _ := time.LoadLocation("America/New_York")
 	return func(w http.ResponseWriter, r *http.Request) {
 		var logs []LogEntry
 		if err := getDB().WithContext(r.Context()).Order("created_at desc").Find(&logs).Error; err != nil {
@@ -131,7 +132,7 @@ func logsHandler() http.HandlerFunc {
 		resp := response{Logs: []logEntry{}}
 		for _, l := range logs {
 			resp.Logs = append(resp.Logs, logEntry{
-				Timestamp: l.CreatedAt,
+				Timestamp: l.CreatedAt.In(loc),
 				Contents:  l.Contents,
 			})
 		}

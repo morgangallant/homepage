@@ -49,7 +49,7 @@
             const contents = await logs.json();
             const html = contents.logs.map(({ ts, contents }) => {
                 return `<div class="log">
-                    <p><strong>${ts}</strong></p>
+                    <p><strong>${new Date(Date.parse(ts)).toLocaleString()}</strong></p>
                     <p>${contents}</p>
                 </div>`;
             }).join("");
