@@ -113,7 +113,7 @@ func logsHandler() http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		var resp response
+		resp := response{Logs: []logEntry{}}
 		for _, l := range logs {
 			resp.Logs = append(resp.Logs, logEntry{
 				Timestamp: l.CreatedAt,
