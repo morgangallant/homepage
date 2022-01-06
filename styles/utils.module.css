@@ -50,3 +50,19 @@
 .lightText {
   color: #666;
 }
+
+.centered {
+  text-align: center;
+}
+
+.headerFlex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* .searchBar {
+  border: 1px solid #e6e6e6;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+} */
