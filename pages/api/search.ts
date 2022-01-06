@@ -13,7 +13,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     },
     body: JSON.stringify({
       query: query as string,
-      documents: 5,
+      documents: 3,
       samples: 1,
     }),
   });
