@@ -27,6 +27,11 @@ export default function Layout({
         />
         <meta name="og:title" content={siteTitle} />
         <meta name="twitter:card" content="summary_large_image" />
+        <script
+          src="https://fkuadblock.morgangallant.com/script.js"
+          data-site="PIJKMLTA"
+          defer
+        ></script>
       </Head>
       <header className={styles.header}>
         {home ? (
