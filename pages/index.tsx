@@ -68,7 +68,7 @@ export default function Home({
           <div>
             <h2 className={utilStyles.headingLg}>Blog</h2>
           </div>
-          <div>
+          {/* <div>
             <form>
               <input
                 className={utilStyles.searchBar}
@@ -79,7 +79,7 @@ export default function Home({
                 onChange={(e) => setQuery(e.target.value)}
               />
             </form>
-          </div>
+          </div> */}
         </div>
         <ul className={utilStyles.list}>
           {results
