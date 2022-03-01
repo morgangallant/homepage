@@ -6,6 +6,7 @@ import { getSortedPostsData } from "../lib/posts";
 import Link from "next/link";
 import Date from "../components/date";
 import { GetStaticProps } from "next";
+import { SearchBar } from "operand-js";
 
 type searchResults = {
   search: string;
@@ -68,18 +69,37 @@ export default function Home({
           <div>
             <h2 className={utilStyles.headingLg}>Blog</h2>
           </div>
-          {/* <div>
-            <form>
-              <input
-                className={utilStyles.searchBar}
-                type="text"
-                autoComplete="false"
-                placeholder="Search"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-              />
-            </form>
-          </div> */}
+          <div>
+            <SearchBar
+              apiKey={process.env.NEXT_PUBLIC_OPERAND_API_KEY}
+              setId={process.env.NEXT_PUBLIC_OPERAND_SET_ID}
+              feedback
+              placeholderText="Search"
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </div>
+            </SearchBar>
+          </div>
         </div>
         <ul className={utilStyles.list}>
           {results
